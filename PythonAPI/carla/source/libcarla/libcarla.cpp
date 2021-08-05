@@ -123,8 +123,10 @@ static boost::python::object OptionalToPythonObject(OptionalT &optional) {
     }
 
 #define CALL_RETURNING_OPTIONAL_WITHOUT_GIL(cls, fn) +[](const cls &self) { \
-      carla::PythonUtil::ReleaseGIL unlock; \
-      auto optional = self.fn(); \
+      auto optional = [self]() { \
+        carla::PythonUtil::ReleaseGIL unlock; \
+        return self.fn(); \
+      }(); \
       return optional.has_value() ? boost::python::object(*optional) : boost::python::object(); \
     }
 
